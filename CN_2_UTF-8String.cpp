@@ -31,7 +31,7 @@ class CodeConverter
 
 int main(int argc, char *argv[])
 {
-	char *in_gb2312 = "显示中文";
+	char *in_gb2312 = "鏄剧ず涓枃";
 	char out[256] = {0};
 
 	CodeConverter cc = CodeConverter("gb2312", "utf-8");
@@ -44,15 +44,15 @@ int main(int argc, char *argv[])
 */
 
 #include <wchar.h>     
-//#include <locale.h>     
+#include <locale.h>     
 #include <stdlib.h>     
 #include <stdio.h>     
 #include <string.h>
 
 int main(void)      
 {      
-    //setlocale(LC_ALL,"zh_CN.UTF-8");    
-    wchar_t a[10] = L"你好";
+    setlocale(LC_ALL,"zh_CN.UTF-8");    
+    wchar_t a[100] = L"浣犲ソ%d000AAAaaa,,:";
     char t[64] = {0}, tmp[16] = {0};
     int i = 0, len;
     
@@ -63,7 +63,12 @@ int main(void)
     
     for (i = 0;i < len; i++) {
         bzero(tmp, sizeof(tmp));
-        sprintf(tmp, "\\&#x%X;", a[i]);
+	if (a[i] >= 0 && a[i] <= 127)
+        {
+          sprintf(tmp, "%c", a[i]);
+        }else {
+          sprintf(tmp, "\\\\&#x%X;", a[i]);
+        }
         strcat(t, tmp);
     }
     
@@ -71,5 +76,6 @@ int main(void)
     
     return 0;  
 }
+
 
 
