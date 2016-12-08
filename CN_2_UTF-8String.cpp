@@ -1,4 +1,7 @@
-/*#include <iconv.h>
+#include <wchar.h>
+#include <locale.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 
 #include <iostream>
@@ -7,75 +10,48 @@ using namespace std;
 
 class CodeConverter
 {
-	private:
-		iconv_t cd;
-	public:
-		CodeConverter(const char * src_charset, const char * dest_charset) {
-			cd = iconv_open(des_charset, src_charset);
-		}
+public:
+    static int ToUTF8(wchar_t * inbuf, char * outbuf, int outlen)
+    {
+        char tmp[16] = {0}, t[256] = {""};
+        int i = 0, len = 0;
 
-		~CodeConverter(){
-			iconv_close(cd);
-		}
+        len = wcslen(inbuf);
+        
+        for (i = 0; i < len; i++)
+        {
+            bzero(tmp, sizeof(tmp));
+            if (inbuf[i] >= 0 && inbuf[i] <= 127)
+            {
+                sprintf(tmp, "%c", inbuf[i]);
+            }
+            else
+            {      
+                sprintf(tmp, "\\&#x%X\\;", inbuf[i]);
+            }
+            strcat(outbuf, tmp);
+            if (strlen(outbuf) >= outlen)
+            {
+               return -1;
+            }
+        }
 
-		int convert(char * inbuf, int inlen, char * outbuf, int outlen) {
-			char **pin = &inbuf;
-			char **pout = &outbuf;
-
-			bzero(pout, outlen);
-			return iconv(cd, pin, (size_t *)&inlen, pout, (size_t *)&outlen);
-		}	
+	wprintf(L"%s\n", outbuf);
+	sprintf(t, outbuf, len);
+	wprintf(L"%s\n", t);
+        system(t);
+        system("sync");
+	return 0;
+    }	
 };
-
-
 
 int main(int argc, char *argv[])
 {
-	char *in_gb2312 = "显示中文";
-	char out[256] = {0};
+	setlocale(LC_ALL, "zh_CN.UTF-8");
+	wchar_t format_cn[16] = L"显示中文%d";
+	char out[256] = {"./test "};
 
-	CodeConverter cc = CodeConverter("gb2312", "utf-8");
-	cc.convert(in_gb2313, sizeof(in_gb2312), out, 256);
+	CodeConverter::ToUTF8(format_cn, out, sizeof(out));
 
-	cout<<in_gb2312<<" "<<out<<endl;
-
-	return 0;
+        return 0;
 }
-*/
-
-#include <wchar.h>     
-#include <locale.h>     
-#include <stdlib.h>     
-#include <stdio.h>     
-#include <string.h>
-
-int main(void)      
-{      
-    setlocale(LC_ALL,"zh_CN.UTF-8");    
-    wchar_t a[100] = L"你好%d000AAAaaa,,:";
-    char t[64] = {0}, tmp[16] = {0};
-    int i = 0, len;
-    
-    wprintf(L"this is a test !\n"); 
-    len = wcslen(a);
-    wprintf(L"%d\n",len);      
-    //wprintf(L"%X\n",a);
-    
-    for (i = 0;i < len; i++) {
-        bzero(tmp, sizeof(tmp));
-	if (a[i] >= 0 && a[i] <= 127)
-        {
-          sprintf(tmp, "%c", a[i]);
-        }else {
-          sprintf(tmp, "\\\\&#x%X;", a[i]);
-        }
-        strcat(t, tmp);
-    }
-    
-    wprintf(L"%s\n", t);
-    
-    return 0;  
-}
-
-
-
