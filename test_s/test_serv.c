@@ -15,10 +15,10 @@ int main (int argc, char ** argv) {
 	bzero(&addr, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_addr.s_addr = htonl(INADDR_ANY);
-	addr.sin_port = htons(50000);
+	addr.sin_port = htons(80);
 	addr_len = sizeof(addr);
 
-	if ((sock = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+	if ((sock = socket(AF_INET, SOCK_STREAM /*SOCK_DGRAM*/, 0)) < 0) {
 		perror("socket");
 	}
 
